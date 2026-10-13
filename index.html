@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href>
     
     <script>
         tailwind.config = {
@@ -78,7 +79,6 @@
                     </div>
                     <div>
                         <span class="text-2xl font-black tracking-tight text-slate-900">Re<span class="text-emerald-600">give</span></span>
-                        <span class="hidden sm:inline-block text-xs text-slate-400 font-medium ml-2 border-l border-slate-200 pl-2">Share Hope</span>
                     </div>
                 </div>
 
@@ -105,10 +105,7 @@
 
                     <!-- Notifications Dropdown -->
                     <div class="relative">
-                        <button id="notif-btn" onclick="toggleNotifications()" class="relative p-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors">
-                            <i class="fa-regular fa-bell text-lg"></i>
-                            <span id="notif-badge" class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-rose-500 rounded-full ring-2 ring-white"></span>
-                        </button>
+                        
                         
                         <div id="notif-dropdown" class="hidden absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50">
                             <div class="px-4 py-2.5 border-b border-slate-100 flex items-center justify-between">
@@ -266,26 +263,7 @@
 
     <section id="explore" class="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex-1 w-full">
         
-        <div class="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
-            <div>
-                <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-600">Live Neighborhood Board</span>
-                <h2 class="text-3xl font-black text-slate-900 mt-0.5">Explore Active Donations</h2>
-                <p class="text-slate-500 text-xs mt-1">Browse items offered for free by verified neighbors in your radius.</p>
-            </div>
-
-            <!-- Distance Radius Slider -->
-            <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4 max-w-xs w-full">
-                <i class="fa-solid fa-compass text-emerald-600"></i>
-                <div class="flex-1">
-                    <div class="flex justify-between text-[11px] font-bold text-slate-700 mb-1">
-                        <span>Max Distance:</span>
-                        <span id="distance-label" class="text-emerald-600">10 km</span>
-                    </div>
-                    <input type="range" id="distance-slider" min="1" max="30" value="10" oninput="updateDistanceFilter(this.value)" 
-                           class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600">
-                </div>
-            </div>
-        </div>
+        
 
         <!-- Category Filter Pills -->
         <div class="flex items-center gap-2 pb-6 overflow-x-auto custom-scrollbar" id="category-pills">
@@ -344,7 +322,7 @@
                             <i class="fa-solid fa-trophy text-amber-400"></i>
                             <span>Top Giving Neighbors</span>
                         </h3>
-                        <span class="text-[10px] bg-slate-700 text-slate-300 font-bold px-2.5 py-1 rounded-full">Updated Live</span>
+                        <span class="text-[10px] bg-slate-700 text-slate-300 font-bold px-2.5 py-1 rounded-full">Updated Weekly</span>
                     </div>
 
                     <div class="space-y-3.5">
