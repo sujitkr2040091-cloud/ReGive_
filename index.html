@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regive - Community Food & Goods Donation Platform</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        emerald: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            800: '#065f46',
+                            900: '#064e3b',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 9999px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #059669 0%, #0d9488 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col selection:bg-emerald-500 selection:text-white">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-3 max-w-sm w-full pointer-events-none"></div>
+
+    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 gap-4">
+                
+                <!-- Brand Logo -->
+                <div class="flex items-center gap-3 cursor-pointer shrink-0" onclick="scrollToSection('hero')">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-md shadow-emerald-600/20">
+                        <i class="fa-solid fa-hand-holding-heart text-xl"></i>
+                    </div>
+                    <div>
+                        <span class="text-2xl font-black tracking-tight text-slate-900">Re<span class="text-emerald-600">give</span></span>
+                        <span class="hidden sm:inline-block text-xs text-slate-400 font-medium ml-2 border-l border-slate-200 pl-2">Share Hope</span>
+                    </div>
+                </div>
+
+                <!-- Header Search Input (Desktop) -->
+                <div class="hidden md:flex flex-1 max-w-md relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                    <input type="text" id="nav-search-input" onkeyup="syncSearch(this.value)" placeholder="Search meals, clothes, toys, books..." 
+                           class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-xs bg-slate-50/80 focus:bg-white transition-all">
+                </div>
+
+                <!-- Desktop Navigation Links -->
+                <nav class="hidden lg:flex items-center gap-6 font-medium text-xs text-slate-600">
+                    <a href="#explore" class="hover:text-emerald-600 transition-colors">Explore Items</a>
+                    <a href="#impact" class="hover:text-emerald-600 transition-colors">Impact & Leaderboard</a>
+                    <a href="#community" class="hover:text-emerald-600 transition-colors">Stories</a>
+                </nav>
+
+                <!-- Actions / Profile & Notifications -->
+                <div class="flex items-center gap-3 shrink-0">
+                    <button onclick="openPostModal()" class="hidden sm:flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all shadow-md shadow-emerald-600/20 active:scale-95">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Donate Item</span>
+                    </button>
+
+                    <!-- Notifications Dropdown -->
+                    <div class="relative">
+                        <button id="notif-btn" onclick="toggleNotifications()" class="relative p-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors">
+                            <i class="fa-regular fa-bell text-lg"></i>
+                            <span id="notif-badge" class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-rose-500 rounded-full ring-2 ring-white"></span>
+                        </button>
+                        
+                        <div id="notif-dropdown" class="hidden absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50">
+                            <div class="px-4 py-2.5 border-b border-slate-100 flex items-center justify-between">
+                                <h4 class="font-bold text-slate-800 text-xs">Notifications</h4>
+                                <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">2 Unread</span>
+                            </div>
+                            <div class="max-h-72 overflow-y-auto divide-y divide-slate-50 custom-scrollbar">
+                                <div class="p-3.5 hover:bg-slate-50 transition-colors flex gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
+                                        <i class="fa-solid fa-circle-check text-xs"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-slate-800 font-medium"><span class="font-bold">St. Jude Shelter</span> accepted your donation request for "Warm Blankets".</p>
+                                        <span class="text-[10px] text-slate-400 mt-1 block">15 mins ago</span>
+                                    </div>
+                                </div>
+                                <div class="p-3.5 hover:bg-slate-50 transition-colors flex gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center shrink-0 mt-0.5">
+                                        <i class="fa-solid fa-clock text-xs"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-slate-800 font-medium">Urgent food surplus listed near you: <span class="font-bold">Fresh Catered Rice & Curry</span> (0.4 km)</p>
+                                        <span class="text-[10px] text-slate-400 mt-1 block">1 hour ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- User Profile Avatar Modal Trigger -->
+                    <button onclick="openProfileModal()" class="flex items-center gap-2 pl-2 border-l border-slate-200">
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=120" alt="Profile" class="w-9 h-9 rounded-full object-cover ring-2 ring-emerald-500/40 hover:ring-emerald-500 transition-all">
+                    </button>
+
+                    <!-- Mobile Menu Trigger -->
+                    <button onclick="toggleMobileMenu()" class="lg:hidden p-2 text-slate-600 rounded-lg hover:bg-slate-100">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Drawer -->
+        <div id="mobile-menu" class="hidden lg:hidden border-t border-slate-100 bg-white px-4 pt-2 pb-4 space-y-3">
+            <div class="relative pt-2">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-5 text-slate-400 text-xs"></i>
+                <input type="text" onkeyup="syncSearch(this.value)" placeholder="Search items..." class="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 text-xs bg-slate-50">
+            </div>
+            <a href="#explore" onclick="toggleMobileMenu()" class="block py-1.5 text-slate-600 hover:text-emerald-600 font-medium text-xs">Explore Items</a>
+            <a href="#impact" onclick="toggleMobileMenu()" class="block py-1.5 text-slate-600 hover:text-emerald-600 font-medium text-xs">Impact & Leaderboard</a>
+            <a href="#community" onclick="toggleMobileMenu()" class="block py-1.5 text-slate-600 hover:text-emerald-600 font-medium text-xs">Community Stories</a>
+            <button onclick="toggleMobileMenu(); openPostModal();" class="w-full bg-emerald-600 text-white font-bold py-2.5 rounded-xl text-xs">
+                + Donate Item
+            </button>
+        </div>
+    </header>
+
+    <section id="hero" class="relative overflow-hidden bg-gradient-to-b from-emerald-50/70 via-slate-50 to-slate-50 pt-10 pb-16 lg:pt-16 lg:pb-24">
+        <!-- Ambient Decorative Circles -->
+        <div class="absolute top-10 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-emerald-300/20 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+                
+                <!-- Left Hero Banner Text -->
+                <div class="lg:col-span-7 text-center lg:text-left space-y-6">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-100/80 text-emerald-900 text-xs font-bold border border-emerald-200 shadow-sm">
+                        <span class="flex h-2 w-2 rounded-full bg-emerald-500 animate-ping"></span>
+                        Direct Local Food & Resource Sharing Network
+                    </div>
+
+                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.15]">
+                        Turn Excess into <span class="gradient-text">Empathy.</span><br>Give Back Nearby.
+                    </h1>
+
+                    <p class="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto lg:mx-0 font-normal leading-relaxed">
+                        Regive instantly connects thoughtful neighbors, local shelters, and volunteers to rehome leftover food, wearable clothing, toys, books, and household appliances.
+                    </p>
+
+                    <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-1">
+                        <button onclick="openPostModal()" class="w-full sm:w-auto px-7 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl shadow-lg shadow-emerald-600/25 transition-all active:scale-95 flex items-center justify-center gap-2.5 text-sm">
+                            <i class="fa-solid fa-heart text-amber-300"></i>
+                            <span>Donate An Item Now</span>
+                        </button>
+                        <a href="#explore" class="w-full sm:w-auto px-7 py-3.5 bg-white hover:bg-slate-100 text-slate-800 font-bold rounded-2xl border border-slate-200/80 shadow-sm transition-all text-center text-sm">
+                            Explore Available Giving
+                        </a>
+                    </div>
+
+                    <!-- Dynamic Stats Counter Grid -->
+                    <div class="pt-8 border-t border-slate-200/80 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center lg:text-left">
+                        <div class="p-3 bg-white/60 rounded-xl border border-slate-100">
+                            <div class="text-2xl sm:text-3xl font-black text-slate-900" id="stat-meals">1,482</div>
+                            <div class="text-[11px] text-slate-500 font-medium">Meals Saved</div>
+                        </div>
+                        <div class="p-3 bg-white/60 rounded-xl border border-slate-100">
+                            <div class="text-2xl sm:text-3xl font-black text-slate-900" id="stat-clothes">920</div>
+                            <div class="text-[11px] text-slate-500 font-medium">Clothes Donated</div>
+                        </div>
+                        <div class="p-3 bg-white/60 rounded-xl border border-slate-100">
+                            <div class="text-2xl sm:text-3xl font-black text-slate-900" id="stat-donors">415</div>
+                            <div class="text-[11px] text-slate-500 font-medium">Active Donors</div>
+                        </div>
+                        <div class="p-3 bg-white/60 rounded-xl border border-slate-100">
+                            <div class="text-2xl sm:text-3xl font-black text-slate-900" id="stat-co2">2.1t</div>
+                            <div class="text-[11px] text-slate-500 font-medium">CO₂ Offset</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Hero Highlight Showcase Card -->
+                <div class="lg:col-span-5 relative">
+                    <div class="relative mx-auto max-w-md lg:max-w-none">
+                        <div class="bg-white rounded-3xl shadow-xl border border-slate-100 p-5 space-y-4 hover:shadow-2xl transition-all duration-300">
+                            <div class="flex items-center justify-between">
+                                <span class="px-3 py-1 rounded-full text-[11px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-clock text-amber-600 animate-pulse"></i> Urgent • Perishable Food
+                                </span>
+                                <span class="text-xs text-slate-400 font-semibold"><i class="fa-solid fa-location-dot text-emerald-500"></i> 0.3 km away</span>
+                            </div>
+
+                            <div class="relative h-52 rounded-2xl overflow-hidden group">
+                                <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=600" alt="Surplus Meals" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                <div class="absolute bottom-3 left-3 bg-slate-900/80 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg backdrop-blur-md">
+                                    Expires in 4 Hours
+                                </div>
+                            </div>
+
+                            <div>
+                                <h3 class="font-extrabold text-slate-900 text-lg">Fresh Catering Rice & Veggie Bowls (10 Servings)</h3>
+                                <p class="text-xs text-slate-500 mt-1 line-clamp-2">Hygenic, untouched surplus meals from afternoon team lunch event. Packed in microwaveable containers.</p>
+                            </div>
+
+                            <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+                                <div class="flex items-center gap-2.5">
+                                    <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=120" class="w-8 h-8 rounded-full object-cover ring-2 ring-emerald-500" alt="Donor">
+                                    <div>
+                                        <div class="text-xs font-bold text-slate-800 flex items-center gap-1">
+                                            Elena Rostova <i class="fa-solid fa-circle-check text-emerald-500 text-[10px]"></i>
+                                        </div>
+                                        <div class="text-[10px] text-amber-500 font-semibold">★ 4.9 • Hunger Hero</div>
+                                    </div>
+                                </div>
+                                <button onclick="openClaimModal('item-hero')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all shadow-md">
+                                    Claim Now
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section id="explore" class="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex-1 w-full">
+        
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
+            <div>
+                <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-600">Live Neighborhood Board</span>
+                <h2 class="text-3xl font-black text-slate-900 mt-0.5">Explore Active Donations</h2>
+                <p class="text-slate-500 text-xs mt-1">Browse items offered for free by verified neighbors in your radius.</p>
+            </div>
+
+            <!-- Distance Radius Slider -->
+            <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4 max-w-xs w-full">
+                <i class="fa-solid fa-compass text-emerald-600"></i>
+                <div class="flex-1">
+                    <div class="flex justify-between text-[11px] font-bold text-slate-700 mb-1">
+                        <span>Max Distance:</span>
+                        <span id="distance-label" class="text-emerald-600">10 km</span>
+                    </div>
+                    <input type="range" id="distance-slider" min="1" max="30" value="10" oninput="updateDistanceFilter(this.value)" 
+                           class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600">
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Filter Pills -->
+        <div class="flex items-center gap-2 pb-6 overflow-x-auto custom-scrollbar" id="category-pills">
+            <button onclick="setCategory('All')" class="cat-pill active-pill px-4 py-2 rounded-xl text-xs font-bold transition-all bg-emerald-600 text-white shadow-sm shrink-0">
+                All Listings
+            </button>
+            <button onclick="setCategory('Food')" class="cat-pill px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 shrink-0">
+                🍲 Food & Leftovers
+            </button>
+            <button onclick="setCategory('Clothing')" class="cat-pill px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 shrink-0">
+                👕 Clothes & Apparel
+            </button>
+            <button onclick="setCategory('Toys')" class="cat-pill px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 shrink-0">
+                🧸 Toys & Kids
+            </button>
+            <button onclick="setCategory('Books')" class="cat-pill px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 shrink-0">
+                📚 Books & Learning
+            </button>
+            <button onclick="setCategory('Electronics')" class="cat-pill px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 shrink-0">
+                ⚡ Electronics & Home
+            </button>
+            <button onclick="setCategory('Urgent')" class="cat-pill px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 shrink-0">
+                ⚡ Urgent Needs
+            </button>
+        </div>
+
+        <!-- Active Donations Cards Grid -->
+        <div id="donations-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Dynamic JavaScript injection -->
+        </div>
+
+        <!-- Empty State UI -->
+        <div id="empty-state" class="hidden text-center py-16 bg-white rounded-3xl border border-dashed border-slate-200 my-6">
+            <div class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
+                <i class="fa-solid fa-box-open"></i>
+            </div>
+            <h3 class="font-bold text-slate-800 text-base">No items match your filter selection</h3>
+            <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Try expanding your distance slider or resetting category filters to see more community offerings.</p>
+            <button onclick="resetFilters()" class="mt-4 px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700">Reset Search Filters</button>
+        </div>
+    </section>
+
+    <section id="impact" class="bg-slate-900 text-white py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-12">
+                <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-400">Community Stars</span>
+                <h2 class="text-3xl font-black mt-1">Impact Dashboard & Leaderboard</h2>
+                <p class="text-slate-400 text-xs mt-1">Celebrating top contributors who consistently share surplus resources.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Donor Leaderboard List -->
+                <div class="lg:col-span-2 bg-slate-800/80 rounded-3xl p-6 border border-slate-700/60 shadow-xl">
+                    <div class="flex items-center justify-between mb-5">
+                        <h3 class="font-extrabold text-base flex items-center gap-2">
+                            <i class="fa-solid fa-trophy text-amber-400"></i>
+                            <span>Top Giving Neighbors</span>
+                        </h3>
+                        <span class="text-[10px] bg-slate-700 text-slate-300 font-bold px-2.5 py-1 rounded-full">Updated Live</span>
+                    </div>
+
+                    <div class="space-y-3.5">
+                        <!-- Leader #1 -->
+                        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-700/50 hover:bg-slate-700/80 transition-colors border border-slate-600/30">
+                            <div class="flex items-center gap-3">
+                                <span class="font-black text-amber-400 w-5 text-center text-sm">1</span>
+                                <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=120" class="w-10 h-10 rounded-full object-cover ring-2 ring-amber-400" alt="Maria">
+                                <div>
+                                    <h4 class="font-bold text-xs text-slate-100 flex items-center gap-1.5">
+                                        Maria Santos
+                                        <span class="text-[9px] bg-amber-400/20 text-amber-300 font-bold px-2 py-0.5 rounded-full border border-amber-400/30">Hunger Hero</span>
+                                    </h4>
+                                    <span class="text-[11px] text-slate-400">52 Items Donated • 140 Meals Saved</span>
+                                </div>
+                            </div>
+                            <span class="text-xs font-extrabold text-emerald-400 bg-emerald-950/80 border border-emerald-800 px-3 py-1 rounded-full">+520 Pts</span>
+                        </div>
+
+                        <!-- Leader #2 -->
+                        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-700/50 hover:bg-slate-700/80 transition-colors border border-slate-600/30">
+                            <div class="flex items-center gap-3">
+                                <span class="font-black text-slate-300 w-5 text-center text-sm">2</span>
+                                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=120" class="w-10 h-10 rounded-full object-cover" alt="David">
+                                <div>
+                                    <h4 class="font-bold text-xs text-slate-100 flex items-center gap-1.5">
+                                        David Miller
+                                        <span class="text-[9px] bg-blue-400/20 text-blue-300 font-bold px-2 py-0.5 rounded-full border border-blue-400/30">Warmth Spreader</span>
+                                    </h4>
+                                    <span class="text-[11px] text-slate-400">38 Items Donated • Clothes & Coats</span>
+                                </div>
+                            </div>
+                            <span class="text-xs font-extrabold text-emerald-400 bg-emerald-950/80 border border-emerald-800 px-3 py-1 rounded-full">+380 Pts</span>
+                        </div>
+
+                        <!-- Leader #3 -->
+                        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-700/50 hover:bg-slate-700/80 transition-colors border border-slate-600/30">
+                            <div class="flex items-center gap-3">
+                                <span class="font-black text-amber-600 w-5 text-center text-sm">3</span>
+                                <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=120" class="w-10 h-10 rounded-full object-cover" alt="Aisha">
+                                <div>
+                                    <h4 class="font-bold text-xs text-slate-100 flex items-center gap-1.5">
+                                        Aisha Khan
+                                        <span class="text-[9px] bg-teal-400/20 text-teal-300 font-bold px-2 py-0.5 rounded-full border border-teal-400/30">Toy Guardian</span>
+                                    </h4>
+                                    <span class="text-[11px] text-slate-400">26 Items Donated • Kids Books & Toys</span>
+                                </div>
+                            </div>
+                            <span class="text-xs font-extrabold text-emerald-400 bg-emerald-950/80 border border-emerald-800 px-3 py-1 rounded-full">+260 Pts</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Green Ecological Metrics Widget -->
+                <div class="bg-gradient-to-br from-emerald-900 to-teal-900 rounded-3xl p-6 border border-emerald-700/50 shadow-xl flex flex-col justify-between space-y-6">
+                    <div>
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center mb-3">
+                            <i class="fa-solid fa-leaf text-lg"></i>
+                        </div>
+                        <h3 class="font-extrabold text-xl text-white">Neighborhood Eco Score</h3>
+                        <p class="text-xs text-emerald-100/80 leading-relaxed mt-1">Direct peer-to-peer sharing eliminates landfill accumulation and reduces carbon footprint from food decay.</p>
+
+                        <div class="mt-6 space-y-3">
+                            <div class="flex justify-between items-center text-xs border-b border-emerald-800/80 pb-2">
+                                <span class="text-emerald-200">Total Food Recovered:</span>
+                                <span class="font-bold text-white text-sm">740 Kg</span>
+                            </div>
+                            <div class="flex justify-between items-center text-xs border-b border-emerald-800/80 pb-2">
+                                <span class="text-emerald-200">Landfill Diverted:</span>
+                                <span class="font-bold text-white text-sm">1,210 Items</span>
+                            </div>
+                            <div class="flex justify-between items-center text-xs pb-1">
+                                <span class="text-emerald-200">Verified Pickup Success:</span>
+                                <span class="font-bold text-emerald-400 text-sm">98.4%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button onclick="openPostModal()" class="w-full bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-black py-3 rounded-2xl transition-colors text-xs text-center shadow-lg">
+                        Earn Badges By Giving
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="community" class="py-16 bg-slate-50 border-t border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-10">
+                <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-600">Stories of Kindness</span>
+                <h2 class="text-3xl font-black text-slate-900 mt-0.5">Community Gratitude Feed</h2>
+                <p class="text-slate-500 text-xs mt-1">Real handwritten notes from neighbors who connected through Regive.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Story 1 -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-3">
+                    <div class="flex items-center gap-3">
+                        <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=120" class="w-10 h-10 rounded-full object-cover" alt="User">
+                        <div>
+                            <h4 class="font-bold text-xs text-slate-800">Robert Vance</h4>
+                            <span class="text-[10px] text-slate-400">Claimed Children's Books</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-600 italic leading-relaxed">
+                        "The bedtime storybooks were in crisp, brand new condition! My 6-year-old was thrilled. Thank you so much Regive community!"
+                    </p>
+                    <div class="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
+                        <i class="fa-solid fa-heart"></i> Verified Pickup Gratitude
+                    </div>
+                </div>
+
+                <!-- Story 2 -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-3">
+                    <div class="flex items-center gap-3">
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=120" class="w-10 h-10 rounded-full object-cover" alt="User">
+                        <div>
+                            <h4 class="font-bold text-xs text-slate-800">St. Jude Local Shelter</h4>
+                            <span class="text-[10px] text-slate-400">Claimed Catering Surplus</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-600 italic leading-relaxed">
+                        "We received hot catered trays after a seminar ended nearby. Served warm meals to over 45 night shelter residents tonight!"
+                    </p>
+                    <div class="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
+                        <i class="fa-solid fa-heart"></i> Verified Shelter Partner
+                    </div>
+                </div>
+
+                <!-- Story 3 -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-3">
+                    <div class="flex items-center gap-3">
+                        <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=120" class="w-10 h-10 rounded-full object-cover" alt="User">
+                        <div>
+                            <h4 class="font-bold text-xs text-slate-800">Chloe Bennett</h4>
+                            <span class="text-[10px] text-slate-400">Donated Winter Apparel</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-600 italic leading-relaxed">
+                        "Decluttering felt so much more fulfilling knowing these heavy jackets went straight to a mother and her child down the street."
+                    </p>
+                    <div class="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
+                        <i class="fa-solid fa-heart"></i> Verified Donor
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer Section -->
+    <footer class="bg-slate-900 text-slate-400 text-xs py-10 border-t border-slate-800 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div class="space-y-3">
+                <div class="flex items-center gap-2 text-white font-black text-lg">
+                    <div class="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center text-xs">
+                        <i class="fa-solid fa-hand-holding-heart"></i>
+                    </div>
+                    Regive
+                </div>
+                <p class="text-slate-400 leading-relaxed">Connecting compassionate neighbors to prevent waste and support families in need.</p>
+            </div>
+
+            <div>
+                <h4 class="font-bold text-white mb-3">Explore Categories</h4>
+                <ul class="space-y-2">
+                    <li><a href="#explore" onclick="setCategory('Food')" class="hover:text-emerald-400">Leftover Food & Catering</a></li>
+                    <li><a href="#explore" onclick="setCategory('Clothing')" class="hover:text-emerald-400">Wearable Clothes & Shoes</a></li>
+                    <li><a href="#explore" onclick="setCategory('Toys')" class="hover:text-emerald-400">Kids Toys & Puzzles</a></li>
+                    <li><a href="#explore" onclick="setCategory('Books')" class="hover:text-emerald-400">Books & Textbooks</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="font-bold text-white mb-3">Community Safety</h4>
+                <p class="text-slate-400 leading-relaxed">All food items must follow hygienic storage guidelines. Pickup addresses are only revealed after mutual confirmation.</p>
+            </div>
+
+            <div>
+                <h4 class="font-bold text-white mb-3">Stay Connected</h4>
+                <div class="flex gap-3 text-slate-300 text-base mb-3">
+                    <a href="#" class="hover:text-emerald-400"><i class="fa-brands fa-twitter"></i></a>
+                    <a href="#" class="hover:text-emerald-400"><i class="fa-brands fa-facebook"></i></a>
+                    <a href="#" class="hover:text-emerald-400"><i class="fa-brands fa-instagram"></i></a>
+                </div>
+                <span class="text-[11px] text-slate-500">Need help? Support@regive.org</span>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 mt-8 border-t border-slate-800 text-center text-slate-500">
+            &copy; 2026 Regive Community Network. All rights reserved. Built for people and planet.
+        </div>
+    </footer>
+
+    <div id="post-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 relative my-8 animate-in fade-in zoom-in-95 duration-200">
+            <button onclick="closePostModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 p-1">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+
+            <div class="mb-5">
+                <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold mb-2">
+                    <i class="fa-solid fa-gift"></i>
+                </div>
+                <h3 class="text-xl font-black text-slate-900">Post a New Donation</h3>
+                <p class="text-xs text-slate-500 mt-1">List surplus food, clothes, toys, or home essentials for nearby pickup.</p>
+            </div>
+
+            <form id="donation-form" onsubmit="handlePostSubmit(event)" class="space-y-4">
+                <!-- Category Choice -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Item Category *</label>
+                    <select id="form-category" required onchange="toggleFoodFields()" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 text-xs font-semibold text-slate-800 bg-white">
+                        <option value="Food">🍲 Food & Leftovers</option>
+                        <option value="Clothing">👕 Clothing & Footwear</option>
+                        <option value="Toys">🧸 Toys & Kids Gear</option>
+                        <option value="Books">📚 Books & Learning Material</option>
+                        <option value="Electronics">⚡ Household & Electronics</option>
+                        <option value="Others">📦 Other Essentials</option>
+                    </select>
+                </div>
+
+                <!-- Title & Quantity -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Item Title *</label>
+                        <input type="text" id="form-title" required placeholder="e.g. Fresh Baked Muffins (6 pieces)" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Quantity *</label>
+                        <input type="text" id="form-quantity" required placeholder="e.g. 6 pieces" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                </div>
+
+                <!-- Food Specific Expiration Timer Field -->
+                <div id="food-expiry-container" class="bg-amber-50 border border-amber-200/80 rounded-2xl p-3.5 space-y-2">
+                    <label class="block text-xs font-bold text-amber-900">
+                        <i class="fa-solid fa-clock text-amber-600 mr-1"></i> Food Safety & Expiration *
+                    </label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <select id="form-expiry" class="w-full px-2.5 py-1.5 rounded-xl border border-amber-300 text-xs text-amber-900 bg-white">
+                            <option value="Expires in 2 hours">Expires in 2 hours</option>
+                            <option value="Expires in 6 hours" selected>Expires in 6 hours</option>
+                            <option value="Best within 24 hours">Best within 24 hours</option>
+                        </select>
+                        <select id="form-food-type" class="w-full px-2.5 py-1.5 rounded-lg border border-amber-300 text-xs text-amber-900 bg-white">
+                            <option value="Home Cooked Meal">Home Cooked</option>
+                            <option value="Packaged / Bakery">Bakery / Packaged</option>
+                            <option value="Fresh Grocery">Fresh Produce</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Brief Description *</label>
+                    <textarea id="form-desc" rows="2" required placeholder="Describe condition, ingredients/allergens (if food), pickup details..." class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-emerald-500"></textarea>
+                </div>
+
+                <!-- Location & Urgency -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Pickup Neighborhood *</label>
+                        <input type="text" id="form-location" required placeholder="e.g. Green Valley Street, Block A" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Pickup Urgency</label>
+                        <select id="form-urgency" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 bg-white">
+                            <option value="Urgent">⚡ Urgent Pickup Needed</option>
+                            <option value="Normal" selected>Flexible Time Today</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Image Preset Simulation Selector -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Select Cover Preview Graphic</label>
+                    <div class="grid grid-cols-4 gap-2">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="photo-preset" value="food" checked class="peer hidden">
+                            <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=200" class="w-full h-12 object-cover rounded-xl border-2 border-transparent peer-checked:border-emerald-600 opacity-70 peer-checked:opacity-100 transition-all">
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="photo-preset" value="clothes" class="peer hidden">
+                            <img src="https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&q=80&w=200" class="w-full h-12 object-cover rounded-xl border-2 border-transparent peer-checked:border-emerald-600 opacity-70 peer-checked:opacity-100 transition-all">
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="photo-preset" value="toys" class="peer hidden">
+                            <img src="https://images.unsplash.com/photo-1566576721346-d4a3b4eaeb55?auto=format&fit=crop&q=80&w=200" class="w-full h-12 object-cover rounded-xl border-2 border-transparent peer-checked:border-emerald-600 opacity-70 peer-checked:opacity-100 transition-all">
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="photo-preset" value="books" class="peer hidden">
+                            <img src="https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=200" class="w-full h-12 object-cover rounded-xl border-2 border-transparent peer-checked:border-emerald-600 opacity-70 peer-checked:opacity-100 transition-all">
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Submit Action Controls -->
+                <div class="pt-3 flex items-center justify-end gap-3">
+                    <button type="button" onclick="closePostModal()" class="px-4 py-2 text-xs font-semibold text-slate-500 hover:text-slate-800">Cancel</button>
+                    <button type="submit" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition-all">
+                        Publish Donation
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="claim-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 relative my-8 animate-in fade-in zoom-in-95 duration-200">
+            <button onclick="closeClaimModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 p-1">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl shrink-0">
+                    <i class="fa-solid fa-hand-holding-heart"></i>
+                </div>
+                <div>
+                    <span class="text-[10px] uppercase tracking-wider font-extrabold text-emerald-600">Claim Request</span>
+                    <h3 id="claim-item-title" class="text-base font-extrabold text-slate-900 line-clamp-1">Item Title</h3>
+                    <p id="claim-item-donor" class="text-xs text-slate-500">Offered by Donor Name</p>
+                </div>
+            </div>
+
+            <form onsubmit="handleClaimSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Message to Donor *</label>
+                    <textarea required id="claim-note" rows="3" placeholder="Hi! I would love to pick this up for my household / local center. I can arrive anytime today..." class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-emerald-500"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Preferred Pickup Window *</label>
+                    <select required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 bg-white">
+                        <option value="Within 1 hour">Within 1 Hour (Immediate)</option>
+                        <option value="This Evening">This Evening (5 PM - 8 PM)</option>
+                        <option value="Tomorrow Morning">Tomorrow Morning</option>
+                    </select>
+                </div>
+
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 text-xs text-slate-600 space-y-1">
+                    <div class="font-bold text-slate-800 flex items-center gap-1.5">
+                        <i class="fa-solid fa-shield-halved text-emerald-600"></i> Privacy Guard
+                    </div>
+                    <p class="text-[11px] text-slate-500">Your contact info and pickup address details are only shared after the donor accepts your request.</p>
+                </div>
+
+                <div class="pt-2 flex items-center justify-end gap-3">
+                    <button type="button" onclick="closeClaimModal()" class="px-4 py-2 text-xs font-semibold text-slate-500">Cancel</button>
+                    <button type="submit" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition-all">
+                        Send Request
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="profile-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 relative animate-in fade-in zoom-in-95 duration-200">
+            <button onclick="closeProfileModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <div class="text-center space-y-3">
+                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200" class="w-20 h-20 rounded-full object-cover mx-auto ring-4 ring-emerald-500/30" alt="User Avatar">
+                <div>
+                    <h3 class="font-extrabold text-slate-900 text-lg">Alex Morgan</h3>
+                    <p class="text-xs text-emerald-600 font-bold flex items-center justify-center gap-1">
+                        <i class="fa-solid fa-award"></i> Level 4 Community Helper
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 bg-slate-50 p-3 rounded-2xl border border-slate-100 text-center">
+                    <div>
+                        <div class="font-black text-slate-900 text-base">14</div>
+                        <div class="text-[10px] text-slate-400">Items Shared</div>
+                    </div>
+                    <div>
+                        <div class="font-black text-slate-900 text-base">8</div>
+                        <div class="text-[10px] text-slate-400">Claims Received</div>
+                    </div>
+                    <div>
+                        <div class="font-black text-slate-900 text-base">180</div>
+                        <div class="text-[10px] text-slate-400">Eco Points</div>
+                    </div>
+                </div>
+
+                <div class="text-left space-y-2 pt-2">
+                    <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Earned Badges</span>
+                    <div class="flex flex-wrap gap-1.5">
+                        <span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold border border-amber-200">
+                            🥐 Food Savior
+                        </span>
+                        <span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold border border-emerald-200">
+                            🌱 Eco Neighbor
+                        </span>
+                        <span class="px-2.5 py-1 rounded-full bg-blue-100 text-blue-800 text-[10px] font-bold border border-blue-200">
+                            🤝 Verified Giver
+                        </span>
+                    </div>
+                </div>
+
+                <button onclick="closeProfileModal()" class="w-full mt-4 bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-xl text-xs">
+                    Close Profile
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample Initial Feed Data
+        let donations = [
+            {
+                id: 'item-1',
+                title: 'Fresh Bakery Pastries & Loaves',
+                category: 'Food',
+                quantity: '8 Packs',
+                description: 'Assorted fresh croissants, artisan sourdough, and sweet rolls from today’s morning bake.',
+                location: 'Downtown Center',
+                distance: 0.6,
+                urgency: 'Urgent',
+                expiry: 'Expires in 3 hours',
+                donorName: 'Sarah Jenkins',
+                donorAvatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=120',
+                image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&q=80&w=600',
+                timePosted: '15 mins ago',
+                bookmarked: false
+            },
+            {
+                id: 'item-2',
+                title: 'Kids Winter Jackets & Sweaters (Ages 5-8)',
+                category: 'Clothing',
+                quantity: '5 Items',
+                description: 'Gently used fleece jackets, knit sweaters, and wool beanies. Cleaned and ready to wear.',
+                location: 'Westside Community',
+                distance: 1.2,
+                urgency: 'Normal',
+                expiry: null,
+                donorName: 'David Miller',
+                donorAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=120',
+                image: 'https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&q=80&w=600',
+                timePosted: '1 hour ago',
+                bookmarked: true
+            },
+            {
+                id: 'item-3',
+                title: 'Wooden Building Blocks & Puzzle Set',
+                category: 'Toys',
+                quantity: '1 Box',
+                description: 'Complete educational wooden block set and animal jigsaw puzzles for toddlers.',
+                location: 'Oakridge Suburb',
+                distance: 2.4,
+                urgency: 'Normal',
+                expiry: null,
+                donorName: 'Aisha Khan',
+                donorAvatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=120',
+                image: 'https://images.unsplash.com/photo-1566576721346-d4a3b4eaeb55?auto=format&fit=crop&q=80&w=600',
+                timePosted: '2 hours ago',
+                bookmarked: false
+            },
+            {
+                id: 'item-4',
+                title: 'Cooked Veggie Curry & Rice (12 Portions)',
+                category: 'Food',
+                quantity: '12 Bowls',
+                description: 'Surplus catering from lunch gathering. Packed in hygienic disposable containers.',
+                location: 'East Park District',
+                distance: 0.8,
+                urgency: 'Urgent',
+                expiry: 'Expires in 4 hours',
+                donorName: 'Elena Rostova',
+                donorAvatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=120',
+                image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=600',
+                timePosted: '30 mins ago',
+                bookmarked: false
+            },
+            {
+                id: 'item-5',
+                title: 'High School Textbooks & Math Books',
+                category: 'Books',
+                quantity: '6 Books',
+                description: 'Math, Science, and English literature reference books in great condition.',
+                location: 'University Avenue',
+                distance: 3.1,
+                urgency: 'Normal',
+                expiry: null,
+                donorName: 'Marcus Vance',
+                donorAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=120',
+                image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=600',
+                timePosted: '4 hours ago',
+                bookmarked: false
+            },
+            {
+                id: 'item-6',
+                title: 'Electric Countertop Kettle & Blender',
+                category: 'Electronics',
+                quantity: '2 Items',
+                description: 'Working household appliances. Cleaned, tested, and ready for immediate pickup.',
+                location: 'North Hill',
+                distance: 4.5,
+                urgency: 'Normal',
+                expiry: null,
+                donorName: 'Chloe Bennett',
+                donorAvatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=120',
+                image: 'https://images.unsplash.com/photo-1570222094114-d054a817e56b?auto=format&fit=crop&q=80&w=600',
+                timePosted: '5 hours ago',
+                bookmarked: false
+            }
+        ];
+
+        let activeCategory = 'All';
+        let currentClaimingItem = null;
+        let searchQuery = '';
+        let maxDistanceFilter = 10;
+
+        // Render Active Listings Grid
+        function renderGrid() {
+            const grid = document.getElementById('donations-grid');
+            const emptyState = document.getElementById('empty-state');
+
+            grid.innerHTML = '';
+
+            const filtered = donations.filter(item => {
+                const matchesCategory = (activeCategory === 'All') || 
+                                        (activeCategory === 'Urgent' ? item.urgency === 'Urgent' : item.category === activeCategory);
+                
+                const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                      item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                      item.location.toLowerCase().includes(searchQuery.toLowerCase());
+
+                const matchesDistance = item.distance <= maxDistanceFilter;
+
+                return matchesCategory && matchesSearch && matchesDistance;
+            });
+
+            if (filtered.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            filtered.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden group";
+
+                const isUrgent = item.urgency === 'Urgent';
+
+                card.innerHTML = `
+                    <div class="relative h-48 overflow-hidden bg-slate-100">
+                        <img src="${item.image}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        
+                        <div class="absolute top-3 left-3 flex flex-wrap gap-1.5">
+                            <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-white/95 text-slate-800 shadow-sm backdrop-blur-sm">
+                                ${getCategoryEmoji(item.category)} ${item.category}
+                            </span>
+                            ${isUrgent ? `
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-amber-500 text-white shadow-sm flex items-center gap-1">
+                                    <i class="fa-solid fa-clock animate-pulse"></i> ${item.expiry || 'Urgent'}
+                                </span>
+                            ` : ''}
+                        </div>
+
+                        <button onclick="toggleBookmark('${item.id}')" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm text-slate-600 hover:text-rose-500 flex items-center justify-center shadow-sm transition-colors">
+                            <i class="${item.bookmarked ? 'fa-solid fa-bookmark text-rose-500' : 'fa-regular fa-bookmark'} text-xs"></i>
+                        </button>
+
+                        <div class="absolute bottom-2.5 right-2.5 bg-slate-900/80 text-white text-[10px] font-bold px-2 py-0.5 rounded-lg backdrop-blur-sm">
+                            <i class="fa-solid fa-location-dot text-emerald-400"></i> ${item.distance} km
+                        </div>
+                    </div>
+
+                    <div class="p-5 flex-1 flex flex-col justify-between space-y-3">
+                        <div>
+                            <div class="flex items-center justify-between text-[10px] text-slate-400 font-bold mb-1">
+                                <span>Qty: ${item.quantity}</span>
+                                <span>${item.timePosted}</span>
+                            </div>
+                            <h3 class="font-extrabold text-slate-900 text-base group-hover:text-emerald-600 transition-colors line-clamp-1">${item.title}</h3>
+                            <p class="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">${item.description}</p>
+                        </div>
+
+                        <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <img src="${item.donorAvatar}" class="w-7 h-7 rounded-full object-cover ring-1 ring-slate-200" alt="${item.donorName}">
+                                <div>
+                                    <div class="text-xs font-bold text-slate-800 leading-tight">${item.donorName}</div>
+                                    <div class="text-[10px] text-slate-400">${item.location}</div>
+                                </div>
+                            </div>
+
+                            <button onclick="openClaimModal('${item.id}')" class="bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white text-xs font-bold px-3.5 py-2 rounded-xl transition-all shadow-sm">
+                                Claim Item
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function getCategoryEmoji(cat) {
+            switch(cat) {
+                case 'Food': return '🍲';
+                case 'Clothing': return '👕';
+                case 'Toys': return '🧸';
+                case 'Books': return '📚';
+                case 'Electronics': return '⚡';
+                default: return '📦';
+            }
+        }
+
+        // Search & Category Handler
+        function setCategory(cat) {
+            activeCategory = cat;
+            const buttons = document.querySelectorAll('#category-pills button');
+            buttons.forEach(btn => {
+                if(btn.innerText.includes(cat) || (cat === 'All' && btn.innerText.includes('All Listings'))) {
+                    btn.className = "cat-pill active-pill px-4 py-2 rounded-xl text-xs font-bold transition-all bg-emerald-600 text-white shadow-sm shrink-0";
+                } else {
+                    btn.className = "cat-pill px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 shrink-0";
+                }
+            });
+            renderGrid();
+        }
+
+        function syncSearch(val) {
+            searchQuery = val;
+            renderGrid();
+        }
+
+        function updateDistanceFilter(val) {
+            maxDistanceFilter = parseFloat(val);
+            document.getElementById('distance-label').innerText = val + " km";
+            renderGrid();
+        }
+
+        function resetFilters() {
+            searchQuery = '';
+            document.getElementById('nav-search-input').value = '';
+            document.getElementById('distance-slider').value = 10;
+            updateDistanceFilter(10);
+            setCategory('All');
+        }
+
+        function toggleBookmark(id) {
+            const item = donations.find(d => d.id === id);
+            if(item) {
+                item.bookmarked = !item.bookmarked;
+                showToast(item.bookmarked ? "Saved to your bookmarks!" : "Removed from bookmarks", "info");
+                renderGrid();
+            }
+        }
+
+        // Post Donation Form Handlers
+        function openPostModal() {
+            document.getElementById('post-modal').classList.remove('hidden');
+        }
+
+        function closePostModal() {
+            document.getElementById('post-modal').classList.add('hidden');
+        }
+
+        function toggleFoodFields() {
+            const cat = document.getElementById('form-category').value;
+            const foodBox = document.getElementById('food-expiry-container');
+            if(cat === 'Food') {
+                foodBox.classList.remove('hidden');
+            } else {
+                foodBox.classList.add('hidden');
+            }
+        }
+
+        function handlePostSubmit(e) {
+            e.preventDefault();
+            const category = document.getElementById('form-category').value;
+            const title = document.getElementById('form-title').value;
+            const quantity = document.getElementById('form-quantity').value;
+            const desc = document.getElementById('form-desc').value;
+            const location = document.getElementById('form-location').value;
+            const urgency = document.getElementById('form-urgency').value;
+            const expiry = category === 'Food' ? document.getElementById('form-expiry').value : null;
+
+            const selectedPhoto = document.querySelector('input[name="photo-preset"]:checked').value;
+            let imgUrl = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=600';
+            if(selectedPhoto === 'clothes') imgUrl = 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&q=80&w=600';
+            if(selectedPhoto === 'toys') imgUrl = 'https://images.unsplash.com/photo-1566576721346-d4a3b4eaeb55?auto=format&fit=crop&q=80&w=600';
+            if(selectedPhoto === 'books') imgUrl = 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=600';
+
+            const newItem = {
+                id: 'item-' + (donations.length + 1),
+                title,
+                category,
+                quantity,
+                description: desc,
+                location,
+                distance: 0.2,
+                urgency,
+                expiry,
+                donorName: 'Alex Morgan (You)',
+                donorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=120',
+                image: imgUrl,
+                timePosted: 'Just now',
+                bookmarked: false
+            };
+
+            donations.unshift(newItem);
+            renderGrid();
+            closePostModal();
+            document.getElementById('donation-form').reset();
+            
+            // Increment stat counter mock
+            const donorStat = document.getElementById('stat-donors');
+            donorStat.innerText = (parseInt(donorStat.innerText) + 1).toString();
+
+            showToast("Your donation listing has been published!", "success");
+        }
+
+        // Claim Item Dialog Handlers
+        function openClaimModal(id) {
+            if(id === 'item-hero') {
+                currentClaimingItem = donations[3];
+            } else {
+                currentClaimingItem = donations.find(d => d.id === id);
+            }
+            if(currentClaimingItem) {
+                document.getElementById('claim-item-title').innerText = currentClaimingItem.title;
+                document.getElementById('claim-item-donor').innerText = "Offered by " + currentClaimingItem.donorName;
+                document.getElementById('claim-modal').classList.remove('hidden');
+            }
+        }
+
+        function closeClaimModal() {
+            document.getElementById('claim-modal').classList.add('hidden');
+            currentClaimingItem = null;
+        }
+
+        function handleClaimSubmit(e) {
+            e.preventDefault();
+            const note = document.getElementById('claim-note').value;
+            closeClaimModal();
+            showToast("Pickup request sent to " + (currentClaimingItem ? currentClaimingItem.donorName : "donor") + "!", "success");
+            document.getElementById('claim-note').value = '';
+        }
+
+        // Profile & Notifications Modals
+        function openProfileModal() {
+            document.getElementById('profile-modal').classList.remove('hidden');
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profile-modal').classList.add('hidden');
+        }
+
+        function toggleNotifications() {
+            const dropdown = document.getElementById('notif-dropdown');
+            dropdown.classList.toggle('hidden');
+            document.getElementById('notif-badge').classList.add('hidden');
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        }
+
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Toast Engine
+        function showToast(message, type = "success") {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `pointer-events-auto flex items-center gap-3 p-4 rounded-2xl shadow-2xl text-xs font-bold text-white transition-all transform duration-300 translate-y-2 ${
+                type === 'success' ? 'bg-emerald-700' : 'bg-slate-800'
+            }`;
+            
+            toast.innerHTML = `
+                <div class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                    <i class="fa-solid ${type === 'success' ? 'fa-check' : 'fa-info'} text-[10px]"></i>
+                </div>
+                <div class="flex-1">${message}</div>
+                <button onclick="this.parentElement.remove()" class="text-white/60 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            `;
+
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.remove('translate-y-2'), 10);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // On Window Load Initializer
+        window.onload = function() {
+            renderGrid();
+        };
+    </script>
+</body>
+</html>
